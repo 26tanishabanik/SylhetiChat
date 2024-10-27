@@ -64,11 +64,14 @@ def convert_to_16khz(audio_path):
         print("After conversion, audio frequency", audio.frame_rate)
 
 def remove_spaces_from_filename(audio_path):
+    print("Old Audio path: ", audio_path)
     new_audio_path = audio_path.replace(' ', '')
+    print("New Audio path: ", new_audio_path)
     os.rename(audio_path, new_audio_path)
     return new_audio_path
 
 
+# Function to split audio into 25-second clips
 def split_audio(audio_path, output_directory):
     audio = AudioSegment.from_wav(audio_path)
     duration_ms = len(audio)
@@ -79,13 +82,12 @@ def split_audio(audio_path, output_directory):
         clip.export(os.path.join(output_directory, f"{base_filename}_clip_{i // clip_duration:03d}.wav"), format="wav")
 
 if __name__ == "__main__":
+    # Check if ffmpeg is installed
     if not shutil.which("ffmpeg"):
         print("Please install ffmpeg.")
         sys.exit(1)
 
-    videos = ["https://www.facebook.com/100088312422115/videos/896855869068042",
-              "https://www.facebook.com/100088312422115/videos/1060404595731873",
-              "https://www.youtube.com/watch?v=rEQMnDkJ-Q8"]
+    videos = []
     base_output_directory = "output"
     videos_output_directory = os.path.join(base_output_directory, "videos")
     audio_output_directory = os.path.join(base_output_directory, "audio")
@@ -102,17 +104,21 @@ if __name__ == "__main__":
       else:
         download_youtube_video(video_url, audio_output_directory)
 
-      
-      for video_file in glob.glob(os.path.join(videos_output_directory, "*.mp4")):
-        video_filename = os.path.basename(video_file)
-        audio_filename = f"{os.path.splitext(video_filename)[0]}.wav"
-        audio_path = os.path.join(audio_output_directory, audio_filename)
-        audio_path = remove_spaces_from_filename(audio_path)
-        extract_audio(video_file, audio_path)
-        normalize_audio_frequency(audio_path, "wav")
-      for audio_file in glob.glob(os.path.join(audio_output_directory, "*.wav")):
-          audio_path = remove_spaces_from_filename(audio_file)
+      # Extract audio from the downloaded video
+      if "youtube" in video_url:
+        for audio_file in glob.glob(os.path.join(audio_output_directory, "*.wav")):
+          if "16kHz" not in audio_file:
+            audio_path = remove_spaces_from_filename(audio_file)
+            normalize_audio_frequency(audio_path, "wav")
+      else:
+        for video_file in glob.glob(os.path.join(videos_output_directory, "*.mp4")):
+          video_filename = os.path.basename(video_file)
+          audio_filename = f"{os.path.splitext(video_filename)[0]}.wav"
+          audio_path = os.path.join(audio_output_directory, audio_filename)
+          audio_path = audio_path.replace(' ', '')
+          extract_audio(video_file, audio_path)
           normalize_audio_frequency(audio_path, "wav")
       for audio_file in glob.glob(os.path.join(audio_output_directory, "*.wav")):         
-          split_audio(audio_file, clips_output_directory)
+        split_audio(audio_file, clips_output_directory)
       print("All operations completed.")
+        
