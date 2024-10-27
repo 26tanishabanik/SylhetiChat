@@ -8,7 +8,7 @@ from pydub import AudioSegment
 def download_youtube_video(video_url, output_directory):
     command = [
         'yt-dlp',
-        '-o', os.path.join('/content/output/audio/', '%(title)s.%(ext)s'),
+        '-o', os.path.join('output/audio/', '%(title)s.%(ext)s'),
         '-x',
         '--audio-format', 'wav',
         video_url
@@ -19,7 +19,7 @@ def download_facebook_video(video_url, output_directory):
     command = [
         'facebook_downloader',
         video_url,
-        '-o', '/content/output/videos/',
+        '-o', 'output/videos/',
         '-a'
     ]
     subprocess.run(command)
@@ -37,7 +37,7 @@ def extract_audio(video_path, output_audio_path):
 
 def normalize_audio_frequency(path, ext):
     command = [
-        'bash', '/content/output/normalize_sr.sh', path, ext
+        'bash', './normalize_sr.sh', path, ext
     ]
     subprocess.run(command)
     os.remove(path)
