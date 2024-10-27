@@ -1,3 +1,5 @@
+# Source file: https://github.com/AI4Bharat/IndicWav2Vec/blob/main/data_prep_scripts/ft_scripts/normalize_sr.sh
+
 path="$1"
 ext=".$2"
 for f in $(find "$path" -type f -name "*$ext")
